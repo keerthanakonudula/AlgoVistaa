@@ -4,1123 +4,197 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AlgoVista — Algorithm Visualizer</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
 <style>
 :root {
-  --bg: #09090b;
-  --surface: #111115;
-  --surface2: #18181d;
-  --surface3: #1f1f27;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.13);
-  --cyan: #22d3ee;
-  --violet: #a78bfa;
-  --rose: #fb7185;
-  --amber: #fbbf24;
-  --green: #4ade80;
-  --text: #f4f4f5;
-  --text2: #a1a1aa;
-  --text3: #52525b;
-  --compare-color: #fbbf24;
+  /* Backgrounds */
+  --bg: #0f172a;
+  --surface: #111827;
+  --surface2: #1f2937;
+  --surface3: #374151;
+
+  /* Borders */
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.18);
+
+  /* Accent Gradient Colors */
+  --primary: #38bdf8;
+  --secondary: #818cf8;
+  --accent: #f472b6;
+
+  /* States */
+  --compare-color: #facc15;
   --swap-color: #fb7185;
-  --sorted-color: #4ade80;
+  --sorted-color: #34d399;
   --pivot-color: #a78bfa;
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-ui: 'Cabinet Grotesk', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--font-ui); min-height: 100vh; overflow-x: hidden; }
 
-/* ─── LANDING ─────────────────────────────────── */
-#landing { min-height: 100vh; display: flex; flex-direction: column; }
-
-.nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); }
-.nav-brand { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--cyan); letter-spacing: -0.02em; }
-.nav-links { display: flex; gap: 32px; }
-.nav-links a { color: var(--text2); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
-.nav-links a:hover { color: var(--text); }
-.nav-cta { background: var(--cyan); color: #000; border: none; padding: 9px 22px; border-radius: 8px; font-family: var(--font-ui); font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-.nav-cta:hover { opacity: 0.85; }
-
-.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 60px; position: relative; overflow: hidden; }
-.hero::before { content:''; position: absolute; inset: 0; background: radial-gradient(ellipse 900px 400px at 50% 0%, rgba(34,211,238,0.07) 0%, transparent 70%); pointer-events: none; }
-.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border2); padding: 6px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 500; color: var(--cyan); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 28px; }
-.hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-.hero h1 { font-family: var(--font-display); font-size: clamp(2.8rem, 6vw, 5.5rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; max-width: 820px; margin-bottom: 24px; }
-.hero h1 em { font-style: italic; color: var(--cyan); }
-.hero p { font-size: 1.125rem; color: var(--text2); max-width: 540px; line-height: 1.7; margin-bottom: 40px; }
-.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.btn-primary { background: var(--cyan); color: #000; border: none; padding: 13px 28px; border-radius: 10px; font-family: var(--font-ui); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,211,238,0.25); }
-.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border2); padding: 13px 28px; border-radius: 10px; font-family: var(--font-ui); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
-.btn-secondary:hover { background: var(--surface2); }
-
-.stats-bar { display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.stat-item { flex: 1; text-align: center; padding: 24px; border-right: 1px solid var(--border); }
-.stat-item:last-child { border-right: none; }
-.stat-num { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); }
-.stat-label { font-size: 0.8rem; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
-
-.section { padding: 80px 48px; }
-.section-header { margin-bottom: 48px; }
-.section-eyebrow { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--cyan); margin-bottom: 12px; }
-.section h2 { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; }
-.section p.lead { color: var(--text2); margin-top: 12px; font-size: 1rem; max-width: 560px; line-height: 1.7; }
-
-.algo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.algo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; cursor: pointer; transition: 0.25s; position: relative; overflow: hidden; }
-.algo-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(34,211,238,0.05) 0%, transparent 60%); opacity: 0; transition: 0.3s; }
-.algo-card:hover { border-color: var(--border2); transform: translateY(-3px); }
-.algo-card:hover::before { opacity: 1; }
-.algo-card-tag { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; }
-.tag-sort { background: rgba(34,211,238,0.12); color: var(--cyan); }
-.tag-search { background: rgba(167,139,250,0.12); color: var(--violet); }
-.tag-graph { background: rgba(251,191,36,0.12); color: var(--amber); }
-.algo-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-.algo-card p { font-size: 0.82rem; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
-.algo-card-footer { display: flex; gap: 8px; flex-wrap: wrap; }
-.complexity-pill { font-size: 0.7rem; font-family: var(--font-mono); padding: 3px 9px; border-radius: 4px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border); }
-.complexity-pill.worst { color: var(--rose); }
-.complexity-pill.best { color: var(--green); }
-.algo-card-arrow { position: absolute; top: 20px; right: 20px; color: var(--text3); font-size: 1.2rem; transition: 0.2s; }
-.algo-card:hover .algo-card-arrow { color: var(--cyan); transform: translateX(3px); }
-
-/* ─── VISUALIZER APP ─────────────────────────── */
-#app { display: none; min-height: 100vh; }
-#app.active { display: block; }
-
-.app-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
-.back-btn { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 0.875rem; cursor: pointer; border: none; background: none; font-family: var(--font-ui); transition: color 0.2s; }
-.back-btn:hover { color: var(--text); }
-.app-title { font-family: var(--font-display); font-size: 1.1rem; color: var(--cyan); }
-.mode-tabs { display: flex; background: var(--surface2); border-radius: 8px; padding: 3px; border: 1px solid var(--border); }
-.mode-tab { padding: 7px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-ui); transition: 0.2s; background: transparent; color: var(--text2); }
-.mode-tab.active { background: var(--cyan); color: #000; }
-
-.app-body { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 61px); }
-
-/* Sidebar */
-.sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px; overflow-y: auto; }
-.ctrl-group { margin-bottom: 20px; }
-.ctrl-label { display: block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 8px; }
-select, input[type=text] { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); border-radius: 8px; font-family: var(--font-ui); font-size: 0.875rem; outline: none; }
-select:focus, input[type=text]:focus { border-color: var(--cyan); }
-input[type=range] { width: 100%; accent-color: var(--cyan); }
-
-.sidebar-btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-family: var(--font-ui); font-weight: 700; font-size: 0.875rem; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
-.sb-run { background: var(--cyan); color: #000; }
-.sb-run:hover { opacity: 0.85; }
-.sb-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
-.sb-ghost:hover { background: var(--surface2); color: var(--text); }
-
-.legend-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 4px; }
-.legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.78rem; color: var(--text2); }
-.legend-row:last-child { margin-bottom: 0; }
-.ldot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-
-/* Complexity table in sidebar */
-.complexity-table { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 4px; }
-.ct-row { display: grid; grid-template-columns: 1fr 1fr; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.78rem; }
-.ct-row:last-child { border-bottom: none; }
-.ct-key { color: var(--text3); }
-.ct-val { font-family: var(--font-mono); text-align: right; }
-.ct-val.good { color: var(--green); }
-.ct-val.ok { color: var(--amber); }
-.ct-val.bad { color: var(--rose); }
-.ct-val.space { color: var(--violet); }
-
-/* Main stage */
-.stage { padding: 28px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
-
-/* Visualizer panel */
-.viz-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-.viz-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.viz-panel-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
-.step-badge { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text2); background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; }
-
-/* Y-axis + bars container */
-.chart-area { display: flex; gap: 8px; height: 220px; }
-.y-axis { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 22px; width: 32px; flex-shrink: 0; }
-.y-tick { font-size: 0.68rem; font-family: var(--font-mono); color: var(--text3); text-align: right; }
-.bars-wrap { flex: 1; position: relative; }
-.grid-lines { position: absolute; inset: 0 0 22px 0; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
-.grid-line { border-top: 1px dashed var(--border); width: 100%; }
-#array-box { display: flex; align-items: flex-end; gap: 5px; height: calc(100% - 22px); width: 100%; }
-.x-labels { display: flex; gap: 5px; height: 22px; }
-.x-lbl { flex: 1; text-align: center; font-size: 0.65rem; font-family: var(--font-mono); color: var(--text3); padding-top: 4px; }
-.bar-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
-.bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.25s cubic-bezier(0.4,0,0.2,1), background 0.15s; background: linear-gradient(180deg, rgba(34,211,238,0.8) 0%, rgba(167,139,250,0.7) 100%); position: relative; }
-.bar-val { font-size: 9px; font-family: var(--font-mono); color: var(--text2); margin-bottom: 4px; line-height: 1; }
-.bar-tooltip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--surface3); border: 1px solid var(--border2); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-family: var(--font-mono); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 10; }
-.bar-wrapper:hover .bar-tooltip { opacity: 1; }
-
-/* Narrator */
-.narrator-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; border-left: 3px solid var(--cyan); min-height: 72px; display: flex; align-items: center; }
-.narrator-box p { font-size: 0.95rem; line-height: 1.6; color: var(--text2); }
-.narrator-box p strong { color: var(--text); }
-
-/* Controls */
-.controls-row { display: flex; gap: 10px; flex-wrap: wrap; }
-.ctrl-btn { flex: 1; min-width: 110px; padding: 10px 16px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); border-radius: 8px; font-family: var(--font-ui); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
-.ctrl-btn:hover { background: var(--surface3); color: var(--text); }
-.ctrl-btn.primary { background: var(--cyan); color: #000; border-color: transparent; }
-.ctrl-btn.primary:hover { opacity: 0.85; }
-
-/* ─── COMPARISON MODE ─────────────────────────── */
-#comparison-mode { display: none; }
-#comparison-mode.active { display: block; }
-.comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.comp-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-.comp-panel-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 12px; }
-.comp-algo-select { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.comp-algo-select label { font-size: 0.8rem; color: var(--text2); white-space: nowrap; }
-.comp-algo-select select { flex: 1; }
-.comp-bars { display: flex; align-items: flex-end; gap: 4px; height: 140px; width: 100%; }
-.comp-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; }
-.comp-bar { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.2s; min-height: 2px; }
-.comp-narrator { font-size: 0.8rem; color: var(--text2); min-height: 40px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
-
-.comp-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-.comp-controls label { font-size: 0.8rem; color: var(--text2); }
-
-/* Performance chart */
-.perf-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 16px; }
-.perf-panel h3 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 16px; }
-
-/* ─── COMPLEXITY SECTION ─────────────────────────── */
-.complexity-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-.complexity-section h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.01em; }
-.complexity-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.cx-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
-.cx-card-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 6px; }
-.cx-card-val { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 500; margin-bottom: 4px; }
-.cx-card-desc { font-size: 0.75rem; color: var(--text2); line-height: 1.5; }
-.cx-best { color: var(--green); }
-.cx-avg { color: var(--amber); }
-.cx-worst { color: var(--rose); }
-.cx-space { color: var(--violet); }
-
-/* Use cases */
-.usecase-list { list-style: none; }
-.usecase-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-.usecase-item:last-child { border-bottom: none; }
-.usecase-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: var(--surface2); }
-.usecase-content h4 { font-size: 0.875rem; font-weight: 600; margin-bottom: 3px; }
-.usecase-content p { font-size: 0.8rem; color: var(--text2); line-height: 1.5; }
-
-/* Complexity viz chart */
-.big-o-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-.big-o-section h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
-.big-o-section p { font-size: 0.85rem; color: var(--text2); margin-bottom: 20px; }
-
-/* Responsive */
-@media (max-width: 900px) {
-  .app-body { grid-template-columns: 1fr; }
-  .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
-  .comparison-grid { grid-template-columns: 1fr; }
-  .nav { padding: 16px 20px; }
-  .nav-links { display: none; }
-  .section { padding: 48px 20px; }
-  .stats-bar { flex-wrap: wrap; }
+  /* Text */
+  --text: #f9fafb;
+  --text2: #9ca3af;
+  --text3: #6b7280;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+/* Reset */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:linear-gradient(180deg,#0f172a,#020617);
+  color:var(--text);
+  font-family:sans-serif;
+}
+
+/* NAV */
+.nav{
+  display:flex;
+  justify-content:space-between;
+  padding:18px 40px;
+  border-bottom:1px solid var(--border);
+}
+.nav-brand{
+  font-weight:bold;
+  font-size:1.3rem;
+  color:var(--primary);
+}
+
+/* HERO */
+.hero{
+  text-align:center;
+  padding:80px 20px;
+}
+.hero h1{
+  font-size:3rem;
+  background:linear-gradient(90deg,#38bdf8,#a78bfa,#f472b6);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero p{
+  color:var(--text2);
+  margin-top:16px;
+}
+
+/* BUTTON */
+.btn{
+  margin-top:30px;
+  padding:12px 28px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  background:linear-gradient(90deg,#38bdf8,#818cf8);
+  color:#000;
+}
+
+/* CARDS */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px;
+  transition:.25s;
+}
+.card:hover{
+  transform:translateY(-4px);
+  border-color:var(--primary);
+}
+
+/* VISUAL BARS */
+.bar{
+  width:100%;
+  border-radius:6px 6px 0 0;
+  background:linear-gradient(180deg,#38bdf8,#a78bfa);
+  transition:.2s;
+}
+.bar.compare{background:var(--compare-color)}
+.bar.swap{background:var(--swap-color)}
+.bar.sorted{background:var(--sorted-color)}
+.bar.pivot{background:var(--pivot-color)}
+
+/* PANEL */
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:20px;
+  border-radius:14px;
+}
+
+/* BUTTONS */
+.ctrl-btn{
+  padding:10px 16px;
+  border-radius:8px;
+  border:1px solid var(--border2);
+  background:var(--surface2);
+  color:var(--text2);
+  cursor:pointer;
+}
+.ctrl-btn.primary{
+  background:linear-gradient(90deg,#38bdf8,#818cf8);
+  color:#000;
+}
+
+/* INPUT */
+input,select{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  color:white;
+  padding:8px;
+  border-radius:6px;
+}
+
+/* FOOTER */
+footer{
+  padding:30px;
+  text-align:center;
+  border-top:1px solid var(--border);
+  color:var(--text3);
+}
 </style>
 </head>
+
 <body>
 
-<!-- ═══════════════════════════════════════════════ LANDING PAGE -->
-<div id="landing">
-  <nav class="nav">
-    <div class="nav-brand">AlgoVista</div>
-    <div class="nav-links">
-      <a href="#sorting-section">Sorting</a>
-      <a href="#searching-section">Searching</a>
-      <a href="#graph-section">Graphs</a>
-    </div>
-    <button class="nav-cta" onclick="openVisualizer('bubble')">Launch Visualizer →</button>
-  </nav>
-
-  <section class="hero">
-    <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div> Interactive Learning Tool</div>
-    <h1>Understand <em>algorithms</em><br>at their core</h1>
-    <p>Step through sorting, searching, and graph algorithms one frame at a time. Watch them think. Compare their performance. Understand the complexity.</p>
-    <div class="hero-actions">
-      <button class="btn-primary" onclick="openVisualizer('bubble')">Start Visualizing</button>
-      <button class="btn-secondary" onclick="document.getElementById('sorting-section').scrollIntoView({behavior:'smooth'})">Browse Algorithms</button>
-    </div>
-  </section>
-
-  <div class="stats-bar">
-    <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">Algorithms</div></div>
-    <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Categories</div></div>
-    <div class="stat-item"><div class="stat-num">∞</div><div class="stat-label">Step Control</div></div>
-    <div class="stat-item"><div class="stat-num">2×</div><div class="stat-label">Compare Mode</div></div>
-  </div>
-
-  <!-- SORTING -->
-  <section class="section" id="sorting-section">
-    <div class="section-header">
-      <div class="section-eyebrow">Category 01</div>
-      <h2>Sorting Algorithms</h2>
-      <p class="lead">Rearrange a collection of items into order. The most fundamental family of algorithms in computer science.</p>
-    </div>
-    <div class="algo-grid">
-      <div class="algo-card" onclick="openVisualizer('bubble')">
-        <div class="algo-card-arrow">→</div>
-        <div class="algo-card-tag tag-sort">Sort</div>
-        <h3>Bubble Sort</h3>
-        <p>Repeatedly swaps adjacent elements if they're out of order. Simple but slow — excellent for learning swap mechanics.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(n)</span>
-          <span class="complexity-pill">Θ(n²)</span>
-          <span class="complexity-pill worst">O(n²)</span>
-        </div>
-      </div>
-      <div class="algo-card" onclick="openVisualizer('selection')">
-        <div class="algo-card-arrow">→</div>
-        <div class="algo-card-tag tag-sort">Sort</div>
-        <h3>Selection Sort</h3>
-        <p>Finds the minimum element in the unsorted portion and places it at the front. Always makes exactly n–1 swaps.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(n²)</span>
-          <span class="complexity-pill worst">O(n²)</span>
-        </div>
-      </div>
-      <div class="algo-card" onclick="openVisualizer('insertion')">
-        <div class="algo-card-arrow">→</div>
-        <div class="algo-card-tag tag-sort">Sort</div>
-        <h3>Insertion Sort</h3>
-        <p>Builds the sorted list one item at a time by inserting each element into its correct position. Excellent for nearly-sorted data.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(n)</span>
-          <span class="complexity-pill worst">O(n²)</span>
-        </div>
-      </div>
-      <div class="algo-card" onclick="openVisualizer('quick')">
-        <div class="algo-card-arrow">→</div>
-        <div class="algo-card-tag tag-sort">Sort</div>
-        <h3>Quick Sort</h3>
-        <p>Picks a pivot, partitions elements around it, then recursively sorts each side. One of the fastest algorithms in practice.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(n log n)</span>
-          <span class="complexity-pill worst">O(n²)</span>
-        </div>
-      </div>
-      <div class="algo-card" onclick="openVisualizer('merge')">
-        <div class="algo-card-arrow">→</div>
-        <div class="algo-card-tag tag-sort">Sort</div>
-        <h3>Merge Sort</h3>
-        <p>Divides the array in half, sorts each half recursively, then merges them. Stable and guarantees O(n log n) in all cases.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(n log n)</span>
-          <span class="complexity-pill worst">O(n log n)</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SEARCHING -->
-  <section class="section" id="searching-section" style="padding-top:0;">
-    <div class="section-header">
-      <div class="section-eyebrow">Category 02</div>
-      <h2>Searching Algorithms</h2>
-      <p class="lead">Locate a specific element within a data structure, each with different speed and precondition trade-offs.</p>
-    </div>
-    <div class="algo-grid">
-      <div class="algo-card" style="cursor:default; opacity:0.6;">
-        <div class="algo-card-tag tag-search">Search</div>
-        <h3>Linear Search</h3>
-        <p>Checks every element one by one. Works on unsorted data. Simple but slow for large collections.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(1)</span>
-          <span class="complexity-pill worst">O(n)</span>
-          <span class="complexity-pill" style="color:var(--amber);">Coming soon</span>
-        </div>
-      </div>
-      <div class="algo-card" style="cursor:default; opacity:0.6;">
-        <div class="algo-card-tag tag-search">Search</div>
-        <h3>Binary Search</h3>
-        <p>Halves the search space each step. Requires sorted input. Used in databases, spell checkers, and DNS lookup.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill best">Ω(1)</span>
-          <span class="complexity-pill worst">O(log n)</span>
-          <span class="complexity-pill" style="color:var(--amber);">Coming soon</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- GRAPHS -->
-  <section class="section" id="graph-section" style="padding-top:0;">
-    <div class="section-header">
-      <div class="section-eyebrow">Category 03</div>
-      <h2>Graph Algorithms</h2>
-      <p class="lead">Navigate nodes and edges to find paths, spanning trees, and connected components.</p>
-    </div>
-    <div class="algo-grid">
-      <div class="algo-card" style="cursor:default; opacity:0.6;">
-        <div class="algo-card-tag tag-graph">Graph</div>
-        <h3>BFS — Breadth First</h3>
-        <p>Explores all neighbors before moving deeper. Used in shortest path, social network analysis, and web crawlers.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill worst">O(V+E)</span>
-          <span class="complexity-pill" style="color:var(--amber);">Coming soon</span>
-        </div>
-      </div>
-      <div class="algo-card" style="cursor:default; opacity:0.6;">
-        <div class="algo-card-tag tag-graph">Graph</div>
-        <h3>DFS — Depth First</h3>
-        <p>Goes as deep as possible before backtracking. Used in maze solving, topological sorting, and cycle detection.</p>
-        <div class="algo-card-footer">
-          <span class="complexity-pill worst">O(V+E)</span>
-          <span class="complexity-pill" style="color:var(--amber);">Coming soon</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer style="border-top:1px solid var(--border); padding:28px 48px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-    <div style="font-family:var(--font-display); color:var(--cyan); font-size:1.1rem; font-weight:700;">AlgoVista</div>
-    <div style="font-size:0.8rem; color:var(--text3);">Built for learners. Open for everyone.</div>
-  </footer>
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-brand">AlgoVista</div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ VISUALIZER APP -->
-<div id="app">
-  <header class="app-header">
-    <button class="back-btn" onclick="showLanding()">← Back</button>
-    <div class="app-title" id="app-algo-title">Bubble Sort</div>
-    <div class="mode-tabs">
-      <button class="mode-tab active" onclick="switchMode('visualize', this)">Visualize</button>
-      <button class="mode-tab" onclick="switchMode('compare', this)">Compare</button>
-      <button class="mode-tab" onclick="switchMode('complexity', this)">Complexity</button>
-    </div>
-  </header>
+<!-- HERO -->
+<div class="hero">
+  <h1>Visualize Algorithms Beautifully</h1>
+  <p>Understand sorting and searching step by step with clean visuals.</p>
+  <button class="btn">Start Learning</button>
+</div>
 
-  <div class="app-body">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="ctrl-group">
-        <label class="ctrl-label">Algorithm</label>
-        <select id="algo-select" onchange="onAlgoChange()">
-          <option value="bubble">Bubble Sort</option>
-          <option value="selection">Selection Sort</option>
-          <option value="insertion">Insertion Sort</option>
-          <option value="quick">Quick Sort</option>
-          <option value="merge">Merge Sort</option>
-        </select>
-      </div>
-      <div class="ctrl-group">
-        <label class="ctrl-label">Custom Input</label>
-        <input type="text" id="custom-input" placeholder="e.g. 45, 12, 89, 23">
-        <button class="sidebar-btn sb-ghost" style="margin-top:8px;" onclick="applyCustomInput()">Apply Input</button>
-      </div>
-      <div class="ctrl-group">
-        <label class="ctrl-label">Speed <span id="speed-label" style="font-family:var(--font-mono);color:var(--text2);">×5</span></label>
-        <input type="range" id="speed" min="1" max="10" value="5" oninput="document.getElementById('speed-label').textContent='×'+this.value">
-      </div>
-      <button class="sidebar-btn sb-run" onclick="autoPlay()">Auto-Play ▶</button>
-      <button class="sidebar-btn sb-ghost" onclick="generateRandom()">Randomize Array</button>
-
-      <div class="ctrl-group" style="margin-top:8px;">
-        <label class="ctrl-label">Legend</label>
-        <div class="legend-box">
-          <div class="legend-row"><div class="ldot" style="background:var(--compare-color)"></div> Comparing</div>
-          <div class="legend-row"><div class="ldot" style="background:var(--swap-color)"></div> Swapping / Shifting</div>
-          <div class="legend-row"><div class="ldot" style="background:var(--pivot-color)"></div> Pivot</div>
-          <div class="legend-row"><div class="ldot" style="background:var(--sorted-color)"></div> Sorted / Placed</div>
-        </div>
-      </div>
-
-      <div class="ctrl-group">
-        <label class="ctrl-label">Complexity</label>
-        <div class="complexity-table" id="sidebar-complexity">
-          <!-- filled by JS -->
-        </div>
-      </div>
-    </aside>
-
-    <!-- STAGE -->
-    <main class="stage" id="main-stage">
-      <!-- VISUALIZE MODE -->
-      <div id="visualize-mode">
-        <div class="viz-panel">
-          <div class="viz-panel-header">
-            <div class="viz-panel-title">Array Visualization</div>
-            <div class="step-badge" id="step-counter">Step 0</div>
-          </div>
-          <div class="chart-area">
-            <div class="y-axis" id="y-axis"></div>
-            <div class="bars-wrap">
-              <div class="grid-lines" id="grid-lines"></div>
-              <div id="array-box"></div>
-              <div class="x-labels" id="x-labels"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="narrator-box"><p id="narrator">Welcome to AlgoVista. Choose an algorithm and press <strong>Next Step</strong> or <strong>Auto-Play</strong>.</p></div>
-
-        <div class="controls-row">
-          <button class="ctrl-btn" onclick="stepPrev()">◀ Prev</button>
-          <button class="ctrl-btn primary" id="play-pause" onclick="togglePause()">▶ Play</button>
-          <button class="ctrl-btn" onclick="stepNext()">Next ▶</button>
-          <button class="ctrl-btn" onclick="resetEngine()" style="color:var(--rose);">⟳ Reset</button>
-        </div>
-      </div>
-
-      <!-- COMPARE MODE -->
-      <div id="comparison-mode">
-        <div class="comp-controls">
-          <label>Array size:</label>
-          <input type="range" id="comp-size" min="6" max="20" value="10" style="width:120px;" oninput="document.getElementById('comp-size-label').textContent=this.value">
-          <span id="comp-size-label" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text2);">10</span>
-          <button class="ctrl-btn primary" style="padding:8px 18px;min-width:auto;flex:none;" onclick="startComparison()">Compare ▶</button>
-          <button class="ctrl-btn" style="padding:8px 18px;min-width:auto;flex:none;" onclick="resetComparison()">⟳ Reset</button>
-        </div>
-        <div class="comparison-grid">
-          <div class="comp-panel">
-            <div class="comp-algo-select">
-              <label>Algorithm A:</label>
-              <select id="comp-algo-a"><option value="bubble">Bubble Sort</option><option value="selection">Selection Sort</option><option value="insertion">Insertion Sort</option><option value="quick" selected>Quick Sort</option><option value="merge">Merge Sort</option></select>
-            </div>
-            <div class="comp-bars" id="comp-bars-a"></div>
-            <div class="comp-narrator" id="comp-narrator-a">Waiting to start...</div>
-          </div>
-          <div class="comp-panel">
-            <div class="comp-algo-select">
-              <label>Algorithm B:</label>
-              <select id="comp-algo-b"><option value="bubble">Bubble Sort</option><option value="selection">Selection Sort</option><option value="insertion">Insertion Sort</option><option value="quick">Quick Sort</option><option value="merge" selected>Merge Sort</option></select>
-            </div>
-            <div class="comp-bars" id="comp-bars-b"></div>
-            <div class="comp-narrator" id="comp-narrator-b">Waiting to start...</div>
-          </div>
-        </div>
-
-        <div class="perf-panel">
-          <h3>Performance on Same Input (n = <span id="perf-n">10</span>)</h3>
-          <div style="position:relative;height:260px;">
-            <canvas id="perf-chart" role="img" aria-label="Bar chart comparing algorithm step counts">Step comparison chart</canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- COMPLEXITY MODE -->
-      <div id="complexity-mode" style="display:none;">
-        <div class="complexity-section">
-          <h3 id="cx-algo-title">Bubble Sort — Complexity Analysis</h3>
-          <div class="complexity-cards" id="cx-cards"></div>
-          <div style="border-top:1px solid var(--border);padding-top:20px;">
-            <div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:14px;">Real-World Use Cases</div>
-            <ul class="usecase-list" id="usecase-list"></ul>
-          </div>
-        </div>
-
-        <div class="big-o-section" style="margin-top:16px;">
-          <h3>Big-O Complexity Comparison</h3>
-          <p>How growth rate of operations changes with input size n for different complexity classes.</p>
-          <div style="position:relative;height:300px;">
-            <canvas id="bigo-chart" role="img" aria-label="Line chart comparing O(1), O(log n), O(n), O(n log n), O(n squared) growth rates">Big-O growth comparison chart</canvas>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;">
-            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><span style="width:24px;height:3px;background:#4ade80;display:inline-block;border-radius:2px;"></span> O(1)</span>
-            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><span style="width:24px;height:3px;background:#22d3ee;display:inline-block;border-radius:2px;"></span> O(log n)</span>
-            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><span style="width:24px;height:3px;background:#a78bfa;display:inline-block;border-radius:2px;"></span> O(n)</span>
-            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><span style="width:24px;height:3px;background:#fbbf24;display:inline-block;border-radius:2px;border-top:2px dashed #fbbf24;"></span> O(n log n)</span>
-            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><span style="width:24px;height:3px;background:#fb7185;display:inline-block;border-radius:2px;"></span> O(n²)</span>
-          </div>
-        </div>
-      </div>
-    </main>
+<!-- SAMPLE CARD GRID -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:40px;">
+  <div class="card">
+    <h3>Bubble Sort</h3>
+    <p>Simple swapping algorithm</p>
+  </div>
+  <div class="card">
+    <h3>Quick Sort</h3>
+    <p>Fast divide & conquer</p>
   </div>
 </div>
 
-<script>
-/* ════════════════════════════════════════
-   DATA — Complexity & use cases per algo
-════════════════════════════════════════ */
-const ALGO_DATA = {
-  bubble: {
-    name: 'Bubble Sort',
-    best: 'Ω(n)', bestClass: 'good', bestDesc: 'Already sorted — zero swaps needed, just one pass.',
-    avg: 'Θ(n²)', avgClass: 'bad', avgDesc: 'On random data, most adjacent pairs trigger swaps.',
-    worst: 'O(n²)', worstClass: 'bad', worstDesc: 'Reverse-sorted array — every adjacent pair swaps every pass.',
-    space: 'O(1)', spaceClass: 'space', spaceDesc: 'In-place — no extra memory needed beyond a temp variable.',
-    usecases: [
-      { icon: '📚', title: 'Education & Teaching', desc: 'The canonical first algorithm taught for its visual clarity and simplicity.' },
-      { icon: '🔬', title: 'Small Dataset Sorting', desc: 'Acceptable for arrays under ~10 elements where simplicity beats performance.' },
-      { icon: '✅', title: 'Nearly-Sorted Detection', desc: 'With an early-exit flag, efficiently detects already-sorted sequences in O(n).' },
-    ]
-  },
-  selection: {
-    name: 'Selection Sort',
-    best: 'Ω(n²)', bestClass: 'bad', bestDesc: 'Even on sorted data, must scan the full unsorted region each pass.',
-    avg: 'Θ(n²)', avgClass: 'bad', avgDesc: 'Always performs n²/2 comparisons regardless of input order.',
-    worst: 'O(n²)', worstClass: 'bad', worstDesc: 'Same as best — no early exit possible.',
-    space: 'O(1)', spaceClass: 'space', spaceDesc: 'In-place sort — only a single index variable as extra storage.',
-    usecases: [
-      { icon: '💾', title: 'Write-limited Memory', desc: 'Makes exactly n−1 swaps — ideal for EEPROM or flash where writes are expensive.' },
-      { icon: '🎮', title: 'Simple Embedded Systems', desc: 'Predictable, constant-memory behavior suits microcontrollers with tiny RAM.' },
-      { icon: '🃏', title: 'Card Sorting Analogy', desc: 'Mirrors how humans sort cards by repeatedly finding the lowest and placing it.' },
-    ]
-  },
-  insertion: {
-    name: 'Insertion Sort',
-    best: 'Ω(n)', bestClass: 'good', bestDesc: 'Sorted input — each element is already in place, zero shifts.',
-    avg: 'Θ(n²)', avgClass: 'bad', avgDesc: 'Random input requires shifting roughly half the sorted portion per element.',
-    worst: 'O(n²)', worstClass: 'bad', worstDesc: 'Reverse-sorted input causes maximum shifts on every insertion.',
-    space: 'O(1)', spaceClass: 'space', spaceDesc: 'In-place. Only one extra variable (the key being inserted) is used.',
-    usecases: [
-      { icon: '📡', title: 'Real-time Streaming Data', desc: 'Efficiently inserts new arrivals into an already-sorted running buffer.' },
-      { icon: '🔄', title: 'Hybrid Sort Base Case', desc: 'Used inside Timsort and Introsort for small subarrays where its overhead wins.' },
-      { icon: '🃏', title: 'Hand of Cards', desc: 'Exactly how most people sort a hand of playing cards — pick, compare, insert.' },
-    ]
-  },
-  quick: {
-    name: 'Quick Sort',
-    best: 'Ω(n log n)', bestClass: 'good', bestDesc: 'Ideal pivot always halves the array — perfectly balanced recursion.',
-    avg: 'Θ(n log n)', avgClass: 'ok', avgDesc: 'Random pivots on average produce ~1.39× n log n comparisons.',
-    worst: 'O(n²)', worstClass: 'bad', worstDesc: 'Sorted input with naive pivot: always picks smallest/largest, O(n) depth.',
-    space: 'O(log n)', spaceClass: 'space', spaceDesc: 'Recursion stack depth. Worst case O(n) with unlucky pivots.',
-    usecases: [
-      { icon: '⚡', title: 'Standard Library Default', desc: 'C stdlib qsort(), Java Arrays.sort() for primitives, and Python sort all use Quicksort variants.' },
-      { icon: '🗄️', title: 'In-Memory Sorting', desc: 'Excellent cache locality from sequential scans makes it fast for large in-memory datasets.' },
-      { icon: '🔢', title: 'Database Query Plans', desc: "Used when memory is limited and the data doesn't need a stable sort." },
-    ]
-  },
-  merge: {
-    name: 'Merge Sort',
-    best: 'Ω(n log n)', bestClass: 'ok', bestDesc: 'Even on sorted data, it still divides and merges every level.',
-    avg: 'Θ(n log n)', avgClass: 'ok', avgDesc: 'Guaranteed n log n comparisons regardless of input — very predictable.',
-    worst: 'O(n log n)', worstClass: 'ok', worstDesc: 'Same as best and average — no worst-case degradation possible.',
-    space: 'O(n)', spaceClass: 'space', spaceDesc: 'Needs O(n) auxiliary buffer for the merge step — the main trade-off.',
-    usecases: [
-      { icon: '🗂️', title: 'External Sorting', desc: 'The go-to for sorting datasets larger than RAM — merges sorted disk runs sequentially.' },
-      { icon: '🔗', title: 'Linked List Sorting', desc: 'Unique advantage: O(1) space for linked lists since merging requires no shifting.' },
-      { icon: '📊', title: 'Stable Sort Requirement', desc: 'Preserves equal-element order — essential for multi-key database row sorting.' },
-    ]
-  }
-};
+<!-- VISUAL PANEL -->
+<div class="panel" style="margin:40px">
+  <div style="display:flex;gap:6px;height:200px;align-items:flex-end;">
+    <div class="bar" style="height:40%"></div>
+    <div class="bar compare" style="height:70%"></div>
+    <div class="bar swap" style="height:55%"></div>
+    <div class="bar pivot" style="height:80%"></div>
+    <div class="bar sorted" style="height:100%"></div>
+  </div>
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-let array = [];
-let states = [];
-let it;
-let isAutoPlaying = false;
-let stepCount = 0;
-let perfChartInstance = null;
-let bigoChartInstance = null;
-const MAX_VAL = 80;
+  <div style="margin-top:20px;display:flex;gap:10px;">
+    <button class="ctrl-btn">Prev</button>
+    <button class="ctrl-btn primary">Play</button>
+    <button class="ctrl-btn">Next</button>
+  </div>
+</div>
 
-/* ════════════════════════════════════════
-   LANDING & ROUTING
-════════════════════════════════════════ */
-function showLanding() {
-  document.getElementById('landing').style.display = '';
-  document.getElementById('app').classList.remove('active');
-  isAutoPlaying = false;
-}
+<footer>
+  AlgoVista — Clean UI Upgrade ✨
+</footer>
 
-function openVisualizer(algo) {
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('app').classList.add('active');
-  document.getElementById('algo-select').value = algo;
-  generateRandom();
-  updateSidebarComplexity(algo);
-  document.getElementById('app-algo-title').textContent = ALGO_DATA[algo].name;
-  switchMode('visualize', document.querySelector('.mode-tab'));
-}
-
-function onAlgoChange() {
-  const algo = document.getElementById('algo-select').value;
-  document.getElementById('app-algo-title').textContent = ALGO_DATA[algo].name;
-  updateSidebarComplexity(algo);
-  resetEngine();
-}
-
-function switchMode(mode, tab) {
-  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-  if(tab) tab.classList.add('active');
-  document.getElementById('visualize-mode').style.display = mode === 'visualize' ? '' : 'none';
-  document.getElementById('comparison-mode').style.display = mode === 'compare' ? '' : 'none';
-  document.getElementById('complexity-mode').style.display = mode === 'complexity' ? '' : 'none';
-  isAutoPlaying = false;
-  if(mode === 'complexity') renderComplexitySection();
-  if(mode === 'compare') initCompareMode();
-}
-
-/* ════════════════════════════════════════
-   RENDER
-════════════════════════════════════════ */
-function render(arr, highlights = {}, msg = '') {
-  if(msg) document.getElementById('narrator').innerHTML = msg;
-  const box = document.getElementById('array-box');
-  box.innerHTML = '';
-
-  const maxVal = Math.max(...arr.map(x => x.val), 1);
-  const steps = 5;
-  const yAxis = document.getElementById('y-axis');
-  const gridLines = document.getElementById('grid-lines');
-  const xLabels = document.getElementById('x-labels');
-  yAxis.innerHTML = '';
-  gridLines.innerHTML = '';
-  xLabels.innerHTML = '';
-
-  for(let i = steps; i >= 0; i--) {
-    const v = Math.round((maxVal / steps) * i);
-    yAxis.innerHTML += `<div class="y-tick">${v}</div>`;
-    gridLines.innerHTML += `<div class="grid-line"></div>`;
-  }
-
-  arr.forEach((item, i) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'bar-wrapper';
-
-    const tooltip = document.createElement('div');
-    tooltip.className = 'bar-tooltip';
-    tooltip.textContent = `idx:${i}  val:${item.val}`;
-
-    const valLbl = document.createElement('div');
-    valLbl.className = 'bar-val';
-    valLbl.textContent = item.val;
-
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    const pct = (item.val / maxVal) * 100;
-    bar.style.height = `${pct}%`;
-
-    if(highlights.pivot?.includes(i)) bar.style.background = 'var(--pivot-color)';
-    else if(highlights.compare?.includes(i)) bar.style.background = 'var(--compare-color)';
-    else if(highlights.swap?.includes(i)) bar.style.background = 'var(--swap-color)';
-    else if(item.sorted) bar.style.background = 'var(--sorted-color)';
-    else bar.style.background = 'linear-gradient(180deg, rgba(34,211,238,0.8) 0%, rgba(167,139,250,0.7) 100%)';
-
-    wrapper.append(tooltip, valLbl, bar);
-    box.appendChild(wrapper);
-
-    const xl = document.createElement('div');
-    xl.className = 'x-lbl';
-    xl.textContent = i;
-    xLabels.appendChild(xl);
-  });
-
-  stepCount++;
-  document.getElementById('step-counter').textContent = `Step ${stepCount}`;
-}
-
-/* ════════════════════════════════════════
-   ARRAY GENERATION
-════════════════════════════════════════ */
-function generateRandom(size = 10) {
-  const raw = Array.from({length: size}, () => Math.floor(Math.random() * MAX_VAL) + 10);
-  array = raw.map(v => ({val: v, sorted: false}));
-  resetEngine();
-}
-
-function applyCustomInput() {
-  const str = document.getElementById('custom-input').value;
-  const vals = str.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v) && v > 0);
-  if(vals.length < 2) { alert('Enter at least 2 valid numbers'); return; }
-  array = vals.slice(0, 20).map(v => ({val: Math.min(v, MAX_VAL), sorted: false}));
-  resetEngine();
-}
-
-function resetEngine() {
-  isAutoPlaying = false;
-  stepCount = 0;
-  document.getElementById('play-pause').textContent = '▶ Play';
-  const type = document.getElementById('algo-select').value;
-  if(type === 'bubble') it = bubbleGen();
-  if(type === 'selection') it = selectionGen();
-  if(type === 'insertion') it = insertionGen();
-  if(type === 'quick') it = quickGen();
-  if(type === 'merge') it = mergeGen();
-  states = [];
-  render(array, {}, `Initialized <strong>${ALGO_DATA[type].name}</strong>. Press <strong>Next Step</strong> to begin.`);
-}
-
-/* ════════════════════════════════════════
-   SORTING GENERATORS
-════════════════════════════════════════ */
-function* bubbleGen() {
-  let a = JSON.parse(JSON.stringify(array));
-  for(let i = 0; i < a.length; i++) {
-    let swapped = false;
-    for(let j = 0; j < a.length - i - 1; j++) {
-      yield {arr: clone(a), hl:{compare:[j, j+1]}, msg:`Comparing <strong>${a[j].val}</strong> and <strong>${a[j+1].val}</strong>`};
-      if(a[j].val > a[j+1].val) {
-        [a[j], a[j+1]] = [a[j+1], a[j]];
-        swapped = true;
-        yield {arr: clone(a), hl:{swap:[j, j+1]}, msg:`Swapping → <strong>${a[j].val}</strong> moves left`};
-      }
-    }
-    a[a.length - 1 - i].sorted = true;
-    if(!swapped) break;
-  }
-  a.forEach(x => x.sorted = true);
-  yield {arr: clone(a), hl:{}, msg:'<strong>Sorting complete!</strong> All elements in order.'};
-}
-
-function* selectionGen() {
-  let a = JSON.parse(JSON.stringify(array));
-  for(let i = 0; i < a.length; i++) {
-    let min = i;
-    for(let j = i + 1; j < a.length; j++) {
-      yield {arr: clone(a), hl:{compare:[min,j]}, msg:`Is <strong>${a[j].val}</strong> < current min <strong>${a[min].val}</strong>?`};
-      if(a[j].val < a[min].val) { min = j; }
-    }
-    if(min !== i) [a[i], a[min]] = [a[min], a[i]];
-    a[i].sorted = true;
-    yield {arr: clone(a), hl:{swap:[i]}, msg:`<strong>${a[i].val}</strong> placed at sorted position ${i}`};
-  }
-  yield {arr: clone(a), hl:{}, msg:'<strong>Sorting complete!</strong>'};
-}
-
-function* insertionGen() {
-  let a = JSON.parse(JSON.stringify(array));
-  a[0].sorted = true;
-  for(let i = 1; i < a.length; i++) {
-    let key = clone(a[i]);
-    let j = i - 1;
-    yield {arr: clone(a), hl:{compare:[i]}, msg:`Inserting key <strong>${key.val}</strong> into sorted portion`};
-    while(j >= 0 && a[j].val > key.val) {
-      a[j+1] = clone(a[j]);
-      yield {arr: clone(a), hl:{swap:[j, j+1]}, msg:`Shifting <strong>${a[j].val}</strong> right`};
-      j--;
-    }
-    a[j+1] = key;
-    a.slice(0, i+1).forEach(x => x.sorted = true);
-    yield {arr: clone(a), hl:{swap:[j+1]}, msg:`Inserted <strong>${key.val}</strong> at index ${j+1}`};
-  }
-  yield {arr: clone(a), hl:{}, msg:'<strong>Sorting complete!</strong>'};
-}
-
-function* quickGen() {
-  let a = JSON.parse(JSON.stringify(array));
-  function* partition(low, high) {
-    let pivot = a[high].val;
-    yield {arr: clone(a), hl:{pivot:[high]}, msg:`Pivot chosen: <strong>${pivot}</strong> at index ${high}`};
-    let i = low - 1;
-    for(let j = low; j < high; j++) {
-      yield {arr: clone(a), hl:{compare:[j], pivot:[high]}, msg:`Comparing <strong>${a[j].val}</strong> with pivot <strong>${pivot}</strong>`};
-      if(a[j].val < pivot) {
-        i++;
-        [a[i], a[j]] = [a[j], a[i]];
-        if(i !== j) yield {arr: clone(a), hl:{swap:[i,j]}, msg:`<strong>${a[i].val}</strong> ↔ <strong>${a[j].val}</strong> (move smaller left)`};
-      }
-    }
-    [a[i+1], a[high]] = [a[high], a[i+1]];
-    a[i+1].sorted = true;
-    yield {arr: clone(a), hl:{swap:[i+1]}, msg:`Pivot <strong>${pivot}</strong> placed at final position ${i+1}`};
-    return i + 1;
-  }
-  function* qs(low, high) {
-    if(low < high) {
-      let pi = yield* partition(low, high);
-      yield* qs(low, pi - 1);
-      yield* qs(pi + 1, high);
-    } else if(low === high) { a[low].sorted = true; }
-  }
-  yield* qs(0, a.length - 1);
-  a.forEach(x => x.sorted = true);
-  yield {arr: clone(a), hl:{}, msg:'<strong>Quick Sort complete!</strong>'};
-}
-
-function* mergeGen() {
-  let a = JSON.parse(JSON.stringify(array));
-  function* ms(l, r) {
-    if(l >= r) return;
-    let m = l + Math.floor((r - l) / 2);
-    yield* ms(l, m);
-    yield* ms(m+1, r);
-    yield* mg(l, m, r);
-  }
-  function* mg(l, m, r) {
-    let left = a.slice(l, m+1);
-    let right = a.slice(m+1, r+1);
-    let i=0, j=0, k=l;
-    yield {arr: clone(a), hl:{compare: Array.from({length: r-l+1}, (_,idx) => idx+l)}, msg:`Merging segments [${l}–${m}] and [${m+1}–${r}]`};
-    while(i < left.length && j < right.length) {
-      if(left[i].val <= right[j].val) a[k] = left[i++];
-      else a[k] = right[j++];
-      yield {arr: clone(a), hl:{swap:[k]}, msg:`Placing <strong>${a[k].val}</strong> into merged position ${k}`};
-      k++;
-    }
-    while(i < left.length) a[k++] = left[i++];
-    while(j < right.length) a[k++] = right[j++];
-    for(let x = l; x <= r; x++) a[x].sorted = (l === 0 && r === a.length-1);
-    yield {arr: clone(a), hl:{}, msg:`Segment [${l}–${r}] merged`};
-  }
-  yield* ms(0, a.length - 1);
-  a.forEach(x => x.sorted = true);
-  yield {arr: clone(a), hl:{}, msg:'<strong>Merge Sort complete!</strong>'};
-}
-
-function clone(x) { return JSON.parse(JSON.stringify(x)); }
-
-/* ════════════════════════════════════════
-   ENGINE CONTROLS
-════════════════════════════════════════ */
-function stepNext() {
-  const res = it.next();
-  if(!res.done) {
-    states.push({arr: clone(array), msg: document.getElementById('narrator').innerHTML});
-    array = res.value.arr;
-    render(array, res.value.hl, res.value.msg);
-  }
-}
-
-function stepPrev() {
-  if(states.length > 0) {
-    const prev = states.pop();
-    array = prev.arr;
-    stepCount = Math.max(0, stepCount - 2);
-    render(array, {}, prev.msg);
-  }
-}
-
-function togglePause() {
-  isAutoPlaying = !isAutoPlaying;
-  document.getElementById('play-pause').textContent = isAutoPlaying ? '⏸ Pause' : '▶ Play';
-  if(isAutoPlaying) loop();
-}
-
-async function loop() {
-  while(isAutoPlaying) {
-    const res = it.next();
-    if(res.done) { isAutoPlaying = false; document.getElementById('play-pause').textContent = '▶ Play'; break; }
-    states.push({arr: clone(array), msg: document.getElementById('narrator').innerHTML});
-    array = res.value.arr;
-    render(array, res.value.hl, res.value.msg);
-    const spd = parseInt(document.getElementById('speed').value);
-    const delay = Math.round(2000 / (spd * spd * 0.09 + 1));
-    await new Promise(r => setTimeout(r, delay));
-  }
-}
-
-function autoPlay() {
-  isAutoPlaying = true;
-  document.getElementById('play-pause').textContent = '⏸ Pause';
-  loop();
-}
-
-/* ════════════════════════════════════════
-   SIDEBAR COMPLEXITY
-════════════════════════════════════════ */
-function updateSidebarComplexity(algo) {
-  const d = ALGO_DATA[algo];
-  document.getElementById('sidebar-complexity').innerHTML = `
-    <div class="ct-row"><span class="ct-key">Best</span><span class="ct-val good">${d.best}</span></div>
-    <div class="ct-row"><span class="ct-key">Average</span><span class="ct-val ok">${d.avg}</span></div>
-    <div class="ct-row"><span class="ct-key">Worst</span><span class="ct-val bad">${d.worst}</span></div>
-    <div class="ct-row"><span class="ct-key">Space</span><span class="ct-val space">${d.space}</span></div>
-  `;
-}
-
-/* ════════════════════════════════════════
-   COMPLEXITY SECTION
-════════════════════════════════════════ */
-function renderComplexitySection() {
-  const algo = document.getElementById('algo-select').value;
-  const d = ALGO_DATA[algo];
-  document.getElementById('cx-algo-title').textContent = `${d.name} — Complexity Analysis`;
-
-  document.getElementById('cx-cards').innerHTML = `
-    <div class="cx-card">
-      <div class="cx-card-label">Best Case</div>
-      <div class="cx-card-val cx-best">${d.best}</div>
-      <div class="cx-card-desc">${d.bestDesc}</div>
-    </div>
-    <div class="cx-card">
-      <div class="cx-card-label">Average Case</div>
-      <div class="cx-card-val cx-avg">${d.avg}</div>
-      <div class="cx-card-desc">${d.avgDesc}</div>
-    </div>
-    <div class="cx-card">
-      <div class="cx-card-label">Worst Case</div>
-      <div class="cx-card-val cx-worst">${d.worst}</div>
-      <div class="cx-card-desc">${d.worstDesc}</div>
-    </div>
-    <div class="cx-card">
-      <div class="cx-card-label">Space Complexity</div>
-      <div class="cx-card-val cx-space">${d.space}</div>
-      <div class="cx-card-desc">${d.spaceDesc}</div>
-    </div>
-  `;
-
-  document.getElementById('usecase-list').innerHTML = d.usecases.map(u =>
-    `<li class="usecase-item">
-      <div class="usecase-icon">${u.icon}</div>
-      <div class="usecase-content"><h4>${u.title}</h4><p>${u.desc}</p></div>
-    </li>`
-  ).join('');
-
-  renderBigoChart();
-}
-
-function renderBigoChart() {
-  const n = [1,2,4,8,16,32,64,128];
-  const datasets = [
-    {label:'O(1)',       data: n.map(() => 1),             borderColor:'#4ade80', borderWidth:2, pointRadius:0, tension:0.3},
-    {label:'O(log n)',   data: n.map(x => Math.log2(x)),   borderColor:'#22d3ee', borderWidth:2, pointRadius:0, tension:0.3},
-    {label:'O(n)',       data: n.map(x => x),              borderColor:'#a78bfa', borderWidth:2, pointRadius:0, tension:0.3},
-    {label:'O(n log n)', data: n.map(x => x*Math.log2(x)), borderColor:'#fbbf24', borderDash:[5,3], borderWidth:2, pointRadius:0, tension:0.3},
-    {label:'O(n²)',      data: n.map(x => Math.min(x*x, 20000)), borderColor:'#fb7185', borderWidth:2, pointRadius:0, tension:0.3},
-  ];
-
-  if(bigoChartInstance) bigoChartInstance.destroy();
-  const ctx = document.getElementById('bigo-chart').getContext('2d');
-  bigoChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: { labels: n.map(x => 'n='+x), datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: ctx => `${ctx.dataset.label}: ${Math.round(ctx.raw * 10)/10}` }
-      }},
-      scales: {
-        x: { ticks: { color: '#71717a', font: {family:'DM Mono',size:11} }, grid: { color: 'rgba(255,255,255,0.05)' } },
-        y: { ticks: { color: '#71717a', font: {family:'DM Mono',size:11} }, grid: { color: 'rgba(255,255,255,0.05)' }, max: 400 }
-      }
-    }
-  });
-}
-
-/* ════════════════════════════════════════
-   COMPARISON MODE
-════════════════════════════════════════ */
-let compData = {a: [], b: []};
-let compIters = {a: null, b: null};
-let compRunning = false;
-
-function initCompareMode() {
-  const n = parseInt(document.getElementById('comp-size').value);
-  const raw = Array.from({length: n}, () => Math.floor(Math.random() * MAX_VAL) + 10);
-  compData.a = raw.map(v => ({val: v, sorted: false}));
-  compData.b = JSON.parse(JSON.stringify(compData.a));
-  renderCompBars('a', compData.a, {});
-  renderCompBars('b', compData.b, {});
-}
-
-function resetComparison() {
-  compRunning = false;
-  initCompareMode();
-  document.getElementById('comp-narrator-a').textContent = 'Waiting to start...';
-  document.getElementById('comp-narrator-b').textContent = 'Waiting to start...';
-}
-
-function renderCompBars(side, arr, hl) {
-  const box = document.getElementById(`comp-bars-${side}`);
-  box.innerHTML = '';
-  const maxVal = Math.max(...arr.map(x=>x.val),1);
-  arr.forEach((item, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'comp-bar-wrap';
-    const bar = document.createElement('div');
-    bar.className = 'comp-bar';
-    bar.style.height = `${(item.val/maxVal)*100}%`;
-    if(hl.pivot?.includes(i)) bar.style.background = 'var(--pivot-color)';
-    else if(hl.compare?.includes(i)) bar.style.background = 'var(--compare-color)';
-    else if(hl.swap?.includes(i)) bar.style.background = 'var(--swap-color)';
-    else if(item.sorted) bar.style.background = 'var(--sorted-color)';
-    else bar.style.background = 'linear-gradient(180deg,rgba(34,211,238,0.8),rgba(167,139,250,0.7))';
-    wrap.appendChild(bar);
-    box.appendChild(wrap);
-  });
-}
-
-function makeCompGen(algo, data) {
-  array = JSON.parse(JSON.stringify(data));
-  if(algo === 'bubble') return bubbleGen();
-  if(algo === 'selection') return selectionGen();
-  if(algo === 'insertion') return insertionGen();
-  if(algo === 'quick') return quickGen();
-  if(algo === 'merge') return mergeGen();
-}
-
-async function startComparison() {
-  compRunning = true;
-  const algoA = document.getElementById('comp-algo-a').value;
-  const algoB = document.getElementById('comp-algo-b').value;
-  const sharedData = compData.a;
-
-  let itA = makeCompGen(algoA, sharedData);
-  let itB = makeCompGen(algoB, sharedData);
-  let doneA = false, doneB = false;
-  let stepsA = 0, stepsB = 0;
-
-  const delay = 120;
-  while(compRunning && (!doneA || !doneB)) {
-    if(!doneA) {
-      const r = itA.next();
-      if(r.done) doneA = true;
-      else {
-        stepsA++;
-        renderCompBars('a', r.value.arr, r.value.hl);
-        const txt = r.value.msg.replace(/<[^>]+>/g,'');
-        document.getElementById('comp-narrator-a').textContent = txt;
-      }
-    }
-    if(!doneB) {
-      const r = itB.next();
-      if(r.done) doneB = true;
-      else {
-        stepsB++;
-        renderCompBars('b', r.value.arr, r.value.hl);
-        const txt = r.value.msg.replace(/<[^>]+>/g,'');
-        document.getElementById('comp-narrator-b').textContent = txt;
-      }
-    }
-    await new Promise(r => setTimeout(r, delay));
-  }
-  if(doneA) document.getElementById('comp-narrator-a').textContent = `Done! ${stepsA} steps.`;
-  if(doneB) document.getElementById('comp-narrator-b').textContent = `Done! ${stepsB} steps.`;
-  renderPerfChart(algoA, algoB, stepsA, stepsB);
-}
-
-function renderPerfChart(algoA, algoB, stepsA, stepsB) {
-  const n = parseInt(document.getElementById('comp-size').value);
-  document.getElementById('perf-n').textContent = n;
-  if(perfChartInstance) perfChartInstance.destroy();
-  const ctx = document.getElementById('perf-chart').getContext('2d');
-  perfChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [ALGO_DATA[algoA].name, ALGO_DATA[algoB].name],
-      datasets: [{
-        label: 'Steps taken',
-        data: [stepsA, stepsB],
-        backgroundColor: ['rgba(34,211,238,0.7)', 'rgba(167,139,250,0.7)'],
-        borderColor: ['#22d3ee','#a78bfa'],
-        borderWidth: 1.5, borderRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.raw} steps` } } },
-      scales: {
-        x: { ticks: { color: '#a1a1aa', font: {family:'Cabinet Grotesk',size:13,weight:'500'} }, grid: { display: false } },
-        y: { ticks: { color: '#71717a', font: {family:'DM Mono',size:11} }, grid: { color: 'rgba(255,255,255,0.05)' } }
-      }
-    }
-  });
-}
-
-/* ════════════════════════════════════════
-   INIT
-════════════════════════════════════════ */
-generateRandom();
-updateSidebarComplexity('bubble');
-</script>
 </body>
 </html>
